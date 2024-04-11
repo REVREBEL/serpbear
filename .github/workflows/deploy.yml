@@ -17,5 +17,28 @@ on:
           uses: cloudflare/wrangler-action@1.2.0
           with:
             apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          preCommands: |
+            wrangler kv:namespace create KV_STATUS_PAGE || true
+            export KV_NAMESPACE_ID=$(npx @cloudflare/wrangler@1 kv:namespace list 2> >(tee stderr.log >&2) | head -1 | node -pe "JSON.parse(fs.readFileSync('/dev/stdin').toString()).find(kv => kv.title.includes('KV_STATUS_PAGE')).id")
+            echo "[env.production]" >> wrangler.toml
+            echo "kv_namespaces = [{binding=\"KV_STATUS_PAGE\", id=\"${KV_NAMESPACE_ID}\"}]" >> wrangler.toml
+          postCommands: |
+            npm kv-gc
+          secrets: |
+            USER
+            PASSWORD
+            SECRET
+            APIKEY
+            APIKEY
+            SESSION_DURATION
+            NEXT_PUBLIC_APP_URL
+          environment: production
           env:
             CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            USER: ${{ secrets.USER }}
+            PASSWORD: ${{ secrets.PASSWORD }}
+            SECRET: ${{ secrets.SECRET }}
+            APIKEY: ${{ secrets.APIKEY }}
+            SESSION_DURATION: ${{ secrets.SESSION_DURATION }}
+            NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+
