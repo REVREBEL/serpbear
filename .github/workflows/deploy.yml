@@ -17,6 +17,7 @@ on:
           uses: cloudflare/wrangler-action@1.2.0
           with:
             apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+            accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           preCommands: |
             wrangler kv:namespace create KV_STATUS_PAGE || true
             export KV_NAMESPACE_ID=$(npx @cloudflare/wrangler@1 kv:namespace list 2> >(tee stderr.log >&2) | head -1 | node -pe "JSON.parse(fs.readFileSync('/dev/stdin').toString()).find(kv => kv.title.includes('KV_STATUS_PAGE')).id")
@@ -25,6 +26,8 @@ on:
           postCommands: |
             npm kv-gc
           secrets: |
+            CLOUDFLARE_ACCOUNT_ID
+            CLOUDFLARE_API_TOKEN
             USER
             PASSWORD
             SECRET
@@ -35,6 +38,7 @@ on:
           environment: production
           env:
             CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             USER: ${{ secrets.USER }}
             PASSWORD: ${{ secrets.PASSWORD }}
             SECRET: ${{ secrets.SECRET }}
